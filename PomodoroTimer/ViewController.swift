@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .equalSpacing
-        stackView.spacing = 30
+        stackView.spacing = Metric.stackViewSpacing
         return stackView
     }()
     
@@ -30,14 +30,14 @@ class ViewController: UIViewController {
         label.textAlignment = .center
         label.text = timeLeft.time
         label.textColor = .init(cgColor: Colors.appRed)
-        label.font = .systemFont(ofSize: 36, weight: .regular)
+        label.font = .systemFont(ofSize: Metric.timeLabelFontSize, weight: .regular)
         return label
     }()
     
     private lazy var button: UIButton = {
         let button = UIButton()
-        button.setTitle("WORK", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .medium)
+        button.setTitle("Work", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: Metric.buttonFontSize, weight: .medium)
         button.layer.backgroundColor = Colors.appRed
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return button
@@ -45,9 +45,10 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        var screenWidth = CGFloat(view.frame.width)
         
         let circlePath = UIBezierPath(arcCenter: view.center,
-                                      radius: 160,
+                                      radius: screenWidth * Metric.screenAdjustMultiplier,
                                       startAngle: -(.pi / 2),
                                       endAngle: 3 * .pi / 2,
                                       clockwise: true)
@@ -55,12 +56,12 @@ class ViewController: UIViewController {
         let backgroundShape = CAShapeLayer()
         backgroundShape.path = circlePath.cgPath
         backgroundShape.fillColor = UIColor.clear.cgColor
-        backgroundShape.lineWidth = 10
+        backgroundShape.lineWidth = Metric.progressBarLineWidth
         backgroundShape.strokeColor = Colors.appGray
         view.layer.addSublayer(backgroundShape)
         
         mainShape.path = circlePath.cgPath
-        mainShape.lineWidth = 10
+        mainShape.lineWidth = Metric.progressBarLineWidth
         mainShape.fillColor = UIColor.clear.cgColor
         mainShape.strokeEnd = 0
         mainShape.lineCap = CAShapeLayerLineCap.round
@@ -69,15 +70,15 @@ class ViewController: UIViewController {
         
         view.addSubview(timerStackView)
         timerStackView.translatesAutoresizingMaskIntoConstraints = false
-        timerStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 15).isActive = true
-        timerStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -15).isActive = true
-        timerStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -20 ).isActive = true
+        timerStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Metric.stackViewLeftMargin).isActive = true
+        timerStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: Metric.stackViewRightMargin).isActive = true
+        timerStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: Metric.stackViewBottomMargin ).isActive = true
         timerStackView.alignment = .center
         timerStackView.addArrangedSubview(timeLabel)
         timerStackView.addArrangedSubview(button)
         
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        button.widthAnchor.constraint(equalToConstant: screenWidth * Metric.screenAdjustMultiplier).isActive = true
         button.heightAnchor.constraint(equalToConstant: Metric.buttonHeight).isActive = true
         button.layer.backgroundColor = mainShape.strokeColor
         button.layer.masksToBounds = true
@@ -94,11 +95,11 @@ class ViewController: UIViewController {
                 timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
             } else {
                 mainShape.pauseAnimation()
-                button.setTitle("Play", for: .normal)
+                button.setTitle("Resume", for: .normal)
             }
         } else {
             if mainShape.isPaused() {
-                button.setTitle("Play", for: .normal)
+                button.setTitle("Resume", for: .normal)
             } else {
                 button.setTitle("Pause", for: .normal)
             }
@@ -154,8 +155,16 @@ extension ViewController {
     
     enum Metric {
         static let buttonHeight: CGFloat = 50
-        static let workTime: Double = 20 // 25 минут = 1500
-        static let restTime: Double = 10 // 5 минут = 300
+        static let workTime: Double = 1500
+        static let restTime: Double = 300
+        static let progressBarLineWidth: CGFloat = 10
+        static let stackViewLeftMargin: CGFloat = 15
+        static let stackViewRightMargin: CGFloat = -15
+        static let stackViewBottomMargin: CGFloat = -20
+        static let screenAdjustMultiplier: CGFloat = 0.4
+        static let timeLabelFontSize: CGFloat = 55
+        static let buttonFontSize: CGFloat = 25
+        static let stackViewSpacing: CGFloat = 15
     }
     
     enum Colors {
